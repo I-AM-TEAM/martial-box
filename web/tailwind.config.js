@@ -45,6 +45,12 @@ module.exports = {
             fontWeight: "bold"
           }
         ],
+        "p1": [
+          "20px",
+          {
+            fontWeight: "400"
+          }
+        ],
         "h1": [
           "64px",
           {
