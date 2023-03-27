@@ -1,6 +1,7 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
+import { Button } from './Button';
 
 type PreBattleFormProps = {
   open: boolean;
@@ -18,11 +19,13 @@ export function PreBattleForm({
   onClose,
   open = false,
 }: PreBattleFormProps) {
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, setValue } = useForm();
 
   const onSubmit = (rawData: any) => {
     const data = rawData as PreBattleFormType;
     onGameStart(data.user1, data.user2);
+    setValue('user1', '');
+    setValue('user2', '');
   };
 
   const onError = (error: any) => {
@@ -33,7 +36,7 @@ export function PreBattleForm({
   return (
     <>
       {open && (
-        <div className="fixed w-full h-full flex bg-black/40">
+        <div className="fixed w-full h-full flex bg-black/40 z-10">
           <form onSubmit={handleSubmit(onSubmit, onError)}>
             <div className="z-10 absolute w-[1164px] h-[690px] grid grid-cols-2 top-0 left-[50%] -translate-x-[50%] translate-y-[30%]">
               <div className="col-span-1 bg-theme-red flex justify-center items-center">
@@ -61,12 +64,11 @@ export function PreBattleForm({
               <p className="absolute top-0 right-[50%] translate-x-[50%] mt-16 text-h1 text-white">
                 ระดับความยาก: ยาก
               </p>
-              <button
-                type="submit"
-                className="absolute bottom-0 right-[50%] translate-x-[50%] mb-16 text-btn text-theme-btn-text bg-theme-btn rounded-md w-[232px] h-[82px]"
-              >
-                เริ่มเกม
-              </button>
+              <Button
+                submit
+                label="เริ่มเกม"
+                className="absolute bottom-0 right-[50%] translate-x-[50%] mb-16"
+              />
             </div>
           </form>
         </div>
