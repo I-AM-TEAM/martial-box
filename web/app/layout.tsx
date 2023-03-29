@@ -1,5 +1,5 @@
 import './globals.css';
-import { Kanit } from 'next/font/google';
+import { Kanit, Kalam } from 'next/font/google';
 
 export const metadata = {
   title: 'Create Next App',
@@ -12,6 +12,12 @@ const kanit = Kanit({
   weight: ['400', '500', '600', '700', '800', '900'],
 });
 
+const kalam = Kalam({
+  subsets: ['latin'],
+  variable: '--kalam-font-family',
+  weight: '700',
+});
+
 export default function RootLayout({
   children,
 }: {
@@ -19,7 +25,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={kanit.variable}>{children}</body>
+      <body className={`${kanit.variable} ${kalam.variable}`}>{children}</body>
     </html>
   );
 }

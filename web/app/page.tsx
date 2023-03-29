@@ -5,8 +5,9 @@ import { Button } from '../components/Button';
 import { PreBattleForm } from '../components/PreBattleForm';
 import { ScoreBoardItemList } from '../components/ScoreBoardItemList';
 import { TopScore } from '../components/TopScore';
+import { useRouter } from 'next/navigation';
 
-enum GameLevel {
+export enum GameLevel {
   EASY,
   MEDIUM,
   HARD,
@@ -17,7 +18,8 @@ export default function Home() {
   const [user1, setUser1] = useState('');
   const [user2, setUser2] = useState('');
   const [showMenu, setShowMenu] = useState(false);
-  const [gameLevel, setGameLevel] = useState<GameLevel | null>();
+  const [gameLevel, setGameLevel] = useState<GameLevel | undefined>();
+  const router = useRouter();
 
   const onClose = () => {
     setOpen(false);
@@ -26,7 +28,19 @@ export default function Home() {
   const onGameStart = (user1: string, user2: string) => {
     setUser1(user1);
     setUser2(user2);
-    onClose();
+    router.push('/battle?user1=' + user1 + '&user2=' + user2);
+  };
+
+  const onClickOpenPreBattleGame = (level: GameLevel) => {
+    setGameLevel(level);
+    setOpen(true);
+    setUser1('');
+    setUser2('');
+    setShowMenu(false);
+  };
+
+  const onStartButtonClicked = () => {
+    setShowMenu((prev) => !prev);
   };
 
   const onClickOpenPreBattleGame = (level: GameLevel) => {
@@ -48,7 +62,12 @@ export default function Home() {
         <TopScore />
         <ScoreBoardItemList />
       </div>
-      <PreBattleForm open={open} onClose={onClose} onGameStart={onGameStart} />
+      <PreBattleForm
+        open={open}
+        onClose={onClose}
+        onGameStart={onGameStart}
+        gameLevel={gameLevel}
+      />
       <div className="fixed bottom-0 ml-8 mb-8 flex flex-col gap-3">
         {showMenu && (
           <>
