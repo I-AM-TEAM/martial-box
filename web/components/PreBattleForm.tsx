@@ -1,11 +1,14 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
+import { GameLevel } from '../app/page';
+import { Button } from './Button';
 
 type PreBattleFormProps = {
   open: boolean;
   onClose: () => void;
   onGameStart: (user1: string, user2: string) => void;
+  gameLevel?: GameLevel;
 };
 
 type PreBattleFormType = {
@@ -17,12 +20,15 @@ export function PreBattleForm({
   onGameStart,
   onClose,
   open = false,
+  gameLevel,
 }: PreBattleFormProps) {
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, setValue } = useForm();
 
   const onSubmit = (rawData: any) => {
     const data = rawData as PreBattleFormType;
     onGameStart(data.user1, data.user2);
+    setValue('user1', '');
+    setValue('user2', '');
   };
 
   const onError = (error: any) => {
@@ -30,17 +36,30 @@ export function PreBattleForm({
     alert('กรุณากรอกข้อมูลให้ครบ');
   };
 
+  const getDifficulty = () => {
+    switch (gameLevel) {
+      case GameLevel.EASY:
+        return 'ง่าย';
+      case GameLevel.MEDIUM:
+        return 'ปลานกลาง';
+      case GameLevel.HARD:
+        return 'ยาก';
+      default:
+        return 'unknown';
+    }
+  };
+
   return (
     <>
       {open && (
-        <div className="fixed w-full h-full flex bg-black/40">
+        <div className="fixed w-full h-full flex bg-black/40 z-99">
           <form onSubmit={handleSubmit(onSubmit, onError)}>
-            <div className="z-10 absolute w-[1164px] h-[690px] grid grid-cols-2 top-0 left-[50%] -translate-x-[50%] translate-y-[30%]">
+            <div className="z-99 absolute w-[1164px] h-[690px] grid grid-cols-2 top-0 left-[50%] -translate-x-[50%] translate-y-[30%]">
               <div className="col-span-1 bg-theme-red flex justify-center items-center">
                 <input
                   {...register('user1', { required: true })}
                   type="text"
-                  placeholder="กรอกชื่อ"
+                  placeholder="กรอกฉายายุทธภพ"
                   className="p-4 rounded-md w-[311px] h-[68px] text-p1"
                 />
               </div>
@@ -48,7 +67,7 @@ export function PreBattleForm({
                 <input
                   type="text"
                   {...register('user2', { required: true })}
-                  placeholder="กรอกชื่อ"
+                  placeholder="กรอกฉายายุทธภพ"
                   className="p-4 rounded-md w-[311px] h-[68px] text-p1"
                 />
               </div>
@@ -58,15 +77,14 @@ export function PreBattleForm({
               >
                 X
               </span>
-              <p className="absolute top-0 right-[50%] translate-x-[50%] mt-16 text-h1 text-white">
-                ระดับความยาก: ยาก
+              <p className="absolute top-16 w-full text-center text-h1 text-white">
+                ระดับความยาก: {getDifficulty()}
               </p>
-              <button
-                type="submit"
-                className="absolute bottom-0 right-[50%] translate-x-[50%] mb-16 text-btn text-theme-btn-text bg-theme-btn rounded-md w-[232px] h-[82px]"
-              >
-                เริ่มเกม
-              </button>
+              <Button
+                submit
+                label="เริ่มเกม"
+                className="absolute bottom-0 right-[50%] translate-x-[50%] mb-16"
+              />
             </div>
           </form>
         </div>
