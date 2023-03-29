@@ -36,7 +36,10 @@ function ScoreItem({
   },
 }: ScoreItemType) {
   return (
-    <div id="score-item" className={`flex h-[92px] rounded-md shadow-md`}>
+    <div
+      id="score-item"
+      className={`flex h-[92px] rounded-md shadow-md hover:scale-110 transition-transform`}
+    >
       <div
         className={`relative w-[50%] h-full rounded-l-md flex justify-between items-center px-5 ${
           winner === WINNER.RED || winner === WINNER.DRAW

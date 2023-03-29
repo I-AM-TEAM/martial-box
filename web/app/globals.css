@@ -16,7 +16,10 @@ body {
   background-size: cover;
 }
 
-
+.text-battle-score {
+  @apply text-[200px];
+  font-family: var(--kalam-font-family, 'sans-serif');
+}
 
 .scoreboard-items-group #score-item:nth-child(1) {
   width: 781px;
