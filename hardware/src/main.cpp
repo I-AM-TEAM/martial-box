@@ -5,15 +5,9 @@
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 
-#include "LedButton.h"
-#include "state.h"
-#include "usage_pin.h"
+#include "MartialBoxGame.h"
 
-LedButton btn1(LED_1_PIN, BTN_1_PIN);
-LedButton btn2(LED_2_PIN, BTN_2_PIN);
-LedButton btn3(LED_3_PIN, BTN_3_PIN);
-LedButton btn4(LED_4_PIN, BTN_4_PIN);
-LedButton btn5(LED_5_PIN, BTN_5_PIN);
+MartialBoxGame game;
 
 WiFiClient client;
 PubSubClient mqtt(client);
@@ -28,9 +22,12 @@ void watchButtonState();
 void attachBtnCallbacks();
 void showIpAddress(IPAddress ip);
 
-void onButtonPress(uint8_t btnId) {
-  // this function is called when any buttons is pressed
-}
+// void onButtonPress(uint8_t btnId) {
+//   if (btn[btnId].isActive()) {
+//     btn[btnId].inactive();
+//     // score should count here
+//   }
+// }
 
 void setup() {
   // put your setup code here, to run once:
@@ -44,14 +41,34 @@ void setup() {
   showIpAddress(WiFi.localIP());
 
   mqtt.setServer(MQTT_BROKER, MQTT_PORT);
+  Serial.println("Program started1");
+
+  // pinMode(LED_STRIP_PIN, OUTPUT);
+
+  // for (int i = 0; i < 5; i++) {
+  //   btn[i].setLed(HIGH);
+  // }
+
+  Serial.println("Program started");
 }
+
+// void play() {
+//   for (int i = 0; i < 5; i++) {
+//     if (btn[i].isActive()) {
+//       return;
+//     }
+//   }
+
+//   int8_t randomBtnNumber = random(0, 5);
+//   btn[randomBtnNumber].active();
+// }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
-  switch (getGameStatus()) {
+  switch (game.getGameStatus()) {
     case GameStatus::START:
-      /* code */
+      if (game.hasCurrentButtonActive()) return;
+      game.play();
       break;
     case GameStatus::FINISHED:
       /* code */
@@ -61,7 +78,7 @@ void loop() {
       break;
   }
 
-  watchButtonState();
+  game.running();
 }
 
 void showIpAddress(IPAddress ip) {
@@ -71,18 +88,8 @@ void showIpAddress(IPAddress ip) {
   Serial.println(ip);
 }
 
-void watchButtonState() {
-  btn1.watch();
-  btn2.watch();
-  btn3.watch();
-  btn4.watch();
-  btn5.watch();
-}
-
-void attachBtnCallbacks() {
-  btn1.setOnClick([]() { onButtonPress(1); });
-  btn2.setOnClick([]() { onButtonPress(2); });
-  btn3.setOnClick([]() { onButtonPress(3); });
-  btn4.setOnClick([]() { onButtonPress(4); });
-  btn5.setOnClick([]() { onButtonPress(5); });
-}
+// void attachBtnCallbacks() {
+//   for (int i = 0; i < 5; i++) {
+//     btn[i].setOnClick([]() { onButtonPress(i); });
+//   }
+// }
