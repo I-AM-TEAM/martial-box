@@ -43,18 +43,6 @@ export default function Home() {
     setShowMenu((prev) => !prev);
   };
 
-  const onClickOpenPreBattleGame = (level: GameLevel) => {
-    setGameLevel(level);
-    setOpen(true);
-    setUser1('');
-    setUser2('');
-    setShowMenu(false);
-  };
-
-  const onStartButtonClicked = () => {
-    setShowMenu((prev) => !prev);
-  };
-
   return (
     <div className="relative h-full w-full flex">
       <p className="absolute p-10 text-btn text-theme-btn-text">Score board</p>
