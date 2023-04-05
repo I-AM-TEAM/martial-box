@@ -17,6 +17,7 @@ class MartialBoxGame {
   int _score = 0;
   LedButton *_btn[5];
   void _onButtonPress(LedButton *btn);
+  void (*_callbackOnScoreChange)(int score);
 
  public:
   MartialBoxGame();
@@ -27,6 +28,7 @@ class MartialBoxGame {
   void setup();
   void play();
   void running();
+  void setCallbackOnScoreChange(void (*callback)(int score));
 
   bool hasCurrentButtonActive();
   int getScore() { return this->_score; }

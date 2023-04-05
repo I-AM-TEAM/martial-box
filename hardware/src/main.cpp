@@ -6,28 +6,38 @@
 #include <WiFiClientSecure.h>
 
 #include "MartialBoxGame.h"
+#include "utils.h"
+
+#define GAME_COMMAND_TOPIC "game/command"
+#define GAME_SCORE_TOPIC "game/score"
 
 MartialBoxGame game;
 
 WiFiClient client;
 PubSubClient mqtt(client);
 
-#define WIFI_SSID "SSID"
-#define WIFI_PASSWORD "PASSWORD"
-
-#define MQTT_BROKER "MQTT_BROKER"
-#define MQTT_PORT 1883
-
-void watchButtonState();
-void attachBtnCallbacks();
 void showIpAddress(IPAddress ip);
+bool reconnect();
+bool connectMqttBroker();
 
-// void onButtonPress(uint8_t btnId) {
-//   if (btn[btnId].isActive()) {
-//     btn[btnId].inactive();
-//     // score should count here
-//   }
-// }
+unsigned long lastReconnectAttempt = 0;
+
+void onMqttMessage(char *topic, byte *payload, unsigned int length) {
+  if (strcmp(topic, GAME_COMMAND_TOPIC) == 0) {
+    String jsonString = byteArrayToString(payload);
+    DynamicJsonDocument doc(128);
+    deserializeJson(doc, jsonString);
+    String status = doc["status"].as<String>();
+    GameLevel level = doc["level"].as<GameLevel>();
+
+    if (status.equals("start")) {
+      game.setGameStatus(GameStatus::START);
+      game.setGameLevel(level);
+    } else if (status.equals("stop")) {
+      game.setGameStatus(GameStatus::FINISHED);
+    }
+  }
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -41,30 +51,30 @@ void setup() {
   showIpAddress(WiFi.localIP());
 
   mqtt.setServer(MQTT_BROKER, MQTT_PORT);
-  Serial.println("Program started1");
+  mqtt.setCallback(onMqttMessage);
 
-  // pinMode(LED_STRIP_PIN, OUTPUT);
+  game.setCallbackOnScoreChange([](int score) {
+    DynamicJsonDocument doc(256);
+    doc["player"] = PLAYER;
+    doc["score"] = game.getScore();
 
-  // for (int i = 0; i < 5; i++) {
-  //   btn[i].setLed(HIGH);
-  // }
+    mqtt.beginPublish(GAME_SCORE_TOPIC, doc.size(), false);
+    serializeJson(doc, mqtt);
+    mqtt.endPublish();
+  });
+  game.setup();
 
   Serial.println("Program started");
 }
 
-// void play() {
-//   for (int i = 0; i < 5; i++) {
-//     if (btn[i].isActive()) {
-//       return;
-//     }
-//   }
-
-//   int8_t randomBtnNumber = random(0, 5);
-//   btn[randomBtnNumber].active();
-// }
-
 void loop() {
   // put your main code here, to run repeatedly:
+  if (!connectMqttBroker()) {
+    Serial.println("Failed to connect to MQTT broker");
+    delay(1000);
+    return;
+  }
+
   switch (game.getGameStatus()) {
     case GameStatus::START:
       if (game.hasCurrentButtonActive()) return;
@@ -72,6 +82,8 @@ void loop() {
       break;
     case GameStatus::FINISHED:
       /* code */
+      game.setScore(0);
+      game.setGameStatus(GameStatus::READY);
       break;
     case GameStatus::READY:
       /* code */
@@ -88,8 +100,27 @@ void showIpAddress(IPAddress ip) {
   Serial.println(ip);
 }
 
-// void attachBtnCallbacks() {
-//   for (int i = 0; i < 5; i++) {
-//     btn[i].setOnClick([]() { onButtonPress(i); });
-//   }
-// }
+bool reconnect() {
+  String clientId = "client-" + String(ESP.getEfuseMac(), HEX);
+  String willMessage = "{\"player\":" + String(PLAYER) + "}";
+  if (mqtt.connect(clientId.c_str(), "game/disconnect", 0, false, willMessage.c_str())) {
+    // subscribe to the topic here
+    mqtt.subscribe("game/command");
+  }
+  return mqtt.connected();
+}
+
+bool connectMqttBroker() {
+  if (!mqtt.connected()) {
+    long now = millis();
+    if (now - lastReconnectAttempt > 5000) {
+      lastReconnectAttempt = now;
+      // Attempt to reconnect
+      if (reconnect()) {
+        lastReconnectAttempt = 0;
+        return true;
+      }
+    }
+  }
+  return mqtt.connected();
+}

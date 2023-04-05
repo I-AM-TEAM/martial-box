@@ -34,10 +34,17 @@ void MartialBoxGame::running() {
   }
 }
 
+void MartialBoxGame::setCallbackOnScoreChange(void (*callback)(int)) { this->_callbackOnScoreChange = callback; }
+
 void MartialBoxGame::_onButtonPress(LedButton *btn) {
   if (btn->isActive()) {
     btn->inactive();
+    this->addScore(1);
+  } else {
+    this->addScore(-1);
+  }
 
-    // score should count here
+  if (this->_callbackOnScoreChange) {
+    this->_callbackOnScoreChange(this->getScore());
   }
 }
