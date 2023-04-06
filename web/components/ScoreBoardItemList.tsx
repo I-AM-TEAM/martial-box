@@ -1,5 +1,8 @@
 'use client';
 
+import useSWR from 'swr';
+import { Battle } from '../src/api/Battle';
+
 enum WINNER {
   RED,
   BLUE,
@@ -77,37 +80,44 @@ function ScoreItem({
 }
 
 export function ScoreBoardItemList() {
+  const battleApi = new Battle({ baseURL: process.env.NEXT_PUBLIC_API_URL });
+  const { data: battleLog } = useSWR('/battles', () => {
+    return battleApi
+      .battleControllerFindAll()
+      .then((response) => response.data);
+  });
+
+  const getEnumWinner = (winner: string) => {
+    if (winner === 'RED') {
+      return WINNER.RED;
+    } else if (winner === 'BLUE') {
+      return WINNER.BLUE;
+    } else {
+      return WINNER.DRAW;
+    }
+  };
+
   return (
     <>
       <div className="flex scoreboard-items-group h-auto flex-col items-center gap-4">
-        <ScoreItem
-          winner={WINNER.BLUE}
-          players={{
-            red: { name: 'string1', score: 56 },
-            blue: { name: 'Lnwza007', score: 123 },
-          }}
-        />
-        <ScoreItem
-          winner={WINNER.DRAW}
-          players={{
-            red: { name: 'string1', score: 56 },
-            blue: { name: 'Lnwza007', score: 123 },
-          }}
-        />
-        <ScoreItem
-          winner={WINNER.RED}
-          players={{
-            red: { name: 'string1', score: 56 },
-            blue: { name: 'Lnwza007', score: 123 },
-          }}
-        />
-        <ScoreItem
-          winner={WINNER.BLUE}
-          players={{
-            red: { name: 'string1', score: 56 },
-            blue: { name: 'Lnwza007', score: 123 },
-          }}
-        />
+        {battleLog?.map((log) => {
+          return (
+            <ScoreItem
+              key={log.id}
+              winner={getEnumWinner(log.winner.toUpperCase())}
+              players={{
+                blue: {
+                  name: log.bluePlayerName,
+                  score: log.blueScore,
+                },
+                red: {
+                  name: log.redPlayerName,
+                  score: log.redScore,
+                },
+              }}
+            />
+          );
+        })}
       </div>
     </>
   );

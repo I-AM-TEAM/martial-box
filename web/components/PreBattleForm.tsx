@@ -7,13 +7,13 @@ import { Button } from './Button';
 type PreBattleFormProps = {
   open: boolean;
   onClose: () => void;
-  onGameStart: (user1: string, user2: string) => void;
+  onGameStart: (playerRedName: string, playerBlueName: string) => void;
   gameLevel?: GameLevel;
 };
 
 type PreBattleFormType = {
-  user1: string;
-  user2: string;
+  playerRedName: string;
+  playerBlueName: string;
 };
 
 export function PreBattleForm({
@@ -26,9 +26,9 @@ export function PreBattleForm({
 
   const onSubmit = (rawData: any) => {
     const data = rawData as PreBattleFormType;
-    onGameStart(data.user1, data.user2);
-    setValue('user1', '');
-    setValue('user2', '');
+    onGameStart(data.playerRedName, data.playerBlueName);
+    setValue('playerRedName', '');
+    setValue('playerBlueName', '');
   };
 
   const onError = (error: any) => {
@@ -57,7 +57,7 @@ export function PreBattleForm({
             <div className="z-99 absolute w-[1164px] h-[690px] grid grid-cols-2 top-0 left-[50%] -translate-x-[50%] translate-y-[30%]">
               <div className="col-span-1 bg-theme-red flex justify-center items-center">
                 <input
-                  {...register('user1', { required: true })}
+                  {...register('playerRedName', { required: true })}
                   type="text"
                   placeholder="กรอกฉายายุทธภพ"
                   className="p-4 rounded-md w-[311px] h-[68px] text-p1"
@@ -66,7 +66,7 @@ export function PreBattleForm({
               <div className="col-span-1 bg-theme-blue flex justify-center items-center">
                 <input
                   type="text"
-                  {...register('user2', { required: true })}
+                  {...register('playerBlueName', { required: true })}
                   placeholder="กรอกฉายายุทธภพ"
                   className="p-4 rounded-md w-[311px] h-[68px] text-p1"
                 />

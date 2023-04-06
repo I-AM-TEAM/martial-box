@@ -15,8 +15,6 @@ export enum GameLevel {
 
 export default function Home() {
   const [open, setOpen] = useState(false);
-  const [user1, setUser1] = useState('');
-  const [user2, setUser2] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [gameLevel, setGameLevel] = useState<GameLevel | undefined>();
   const router = useRouter();
@@ -25,17 +23,18 @@ export default function Home() {
     setOpen(false);
   };
 
-  const onGameStart = (user1: string, user2: string) => {
-    setUser1(user1);
-    setUser2(user2);
-    router.push('/battle?user1=' + user1 + '&user2=' + user2);
+  const onGameStart = (playerRedName: string, playerBlueName: string) => {
+    router.push(
+      '/battle?playerRedName=' +
+        playerRedName +
+        '&playerBlueName=' +
+        playerBlueName
+    );
   };
 
   const onClickOpenPreBattleGame = (level: GameLevel) => {
     setGameLevel(level);
     setOpen(true);
-    setUser1('');
-    setUser2('');
     setShowMenu(false);
   };
 
