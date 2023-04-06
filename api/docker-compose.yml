@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  mqtt:
+    image: eclipse-mosquitto:2.0.15
+    container_name: mqtt-martial-box-broker
+    restart: always
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ./mosquitto.dev.conf:/mosquitto/config/mosquitto.conf
+    networks:
+      - martial-box-network
+networks:
+  martial-box-network:

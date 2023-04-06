@@ -1,0 +1,30 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  highScore   Int         @default(0) @map("high_score")
+  blueBattles BattleLog[] @relation("BluePlayer")
+  redBattles  BattleLog[] @relation("RedPlayer")
+}
+
+model BattleLog {
+  id           Int      @id @default(autoincrement())
+  redPlayerId  Int      @map("red_player_id")
+  redScore     Int      @map("red_score")
+  bluePlayerId Int      @map("blue_player_id")
+  blueScore    Int      @map("blue_score")
+  createdAt    DateTime @default(now()) @map("created_at")
+  redPlayer    Player   @relation("RedPlayer", fields: [redPlayerId], references: [id])
+  bluePlayer   Player   @relation("BluePlayer", fields: [bluePlayerId], references: [id])
+}
