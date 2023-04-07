@@ -2,6 +2,7 @@
 
 import useSWR from 'swr';
 import { Battle } from '../src/api/Battle';
+import Image from 'next/image';
 
 enum WINNER {
   RED,
@@ -41,7 +42,7 @@ function ScoreItem({
   return (
     <div
       id="score-item"
-      className={`flex h-[92px] rounded-md shadow-md hover:scale-110 transition-transform`}
+      className={`relative flex h-[92px] rounded-md shadow-md hover:scale-110 transition-transform`}
     >
       <div
         className={`relative w-[50%] h-full rounded-l-md flex justify-between items-center px-5 ${
@@ -74,6 +75,9 @@ function ScoreItem({
         )}
         <p className="text-win-score">{players.blue.score}</p>
         <p className="text-u-name">{players.blue.name}</p>
+      </div>
+      <div className="absolute left-1/2 -translate-x-1/2 -translate-y-2">
+        <Image src="/images/swords.png" alt="sword" width={32} height={32} />
       </div>
     </div>
   );

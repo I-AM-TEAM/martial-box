@@ -1,5 +1,6 @@
 import { Players } from '../src/api/Players';
 import useSWR from 'swr';
+import Image from 'next/image';
 
 export function TopScore() {
   const playerApi = new Players({ baseURL: process.env.NEXT_PUBLIC_API_URL });
@@ -7,18 +8,6 @@ export function TopScore() {
   const { data: playerTopRank } = useSWR('/players', () =>
     playerApi.playersControllerGetPlayerTopRank().then((res) => res.data)
   );
-
-  const getClassRankFromOrder = (order: number) => {
-    switch (order) {
-      case 1:
-        return 'top-1st';
-      case 2:
-        return 'top-2nd';
-      case 3:
-        return 'top-3rd';
-    }
-    return 'top-1st';
-  };
 
   return (
     <>
@@ -39,6 +28,7 @@ export function TopScore() {
             <p className="text-h1 opacity-60">1</p>
             <p className="text-big-score">{playerTopRank?.[0].highScore}</p>
             <p className="text-u-name">{playerTopRank?.[0].name}</p>
+            <Image src="/images/badge.png" width={92} height={92} alt="badge" />
           </div>
         )}
         {playerTopRank?.[2] && (

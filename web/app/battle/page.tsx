@@ -2,6 +2,10 @@
 import { useEffect, useState } from 'react';
 import { useCountdown } from 'usehooks-ts';
 import { secondsToMinutes } from '../../src/utils/format';
+import { useSubscription, useMqttState } from 'mqtt-react-hooks';
+import { MQTTMessage, MQTT_TOPIC } from '../../src/mqtt/message';
+import { Battle } from '../../src/api/Battle';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 type BattleScoreBarProps = {
   redScore: number;
@@ -52,9 +56,22 @@ function BattleScoreBar({ redScore, blueScore }: BattleScoreBarProps) {
 export default function BattlePage() {
   const [redScore, setRedScore] = useState(0);
   const [blueScore, setBlueScore] = useState(0);
+  const [isStart, setStart] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const redPlayerName = searchParams.get('playerRedName');
+  const bluePlayerName = searchParams.get('playerBlueName');
+  const gameLevel = searchParams.get('gameLevel');
+
+  const battleApi = new Battle({ baseURL: process.env.NEXT_PUBLIC_API_URL });
+
+  const { message: onReceiveScore } = useSubscription(['game/score']);
+  const { client } = useMqttState();
 
   const [count, { startCountdown, resetCountdown }] = useCountdown({
-    countStart: 180,
+    // countStart: 180,
+    countStart: 20,
     intervalMs: 1000,
   });
 
@@ -64,6 +81,23 @@ export default function BattlePage() {
   });
 
   useEffect(() => {
+    if (onReceiveScore?.message) {
+      const { player, score } = JSON.parse(onReceiveScore.message as string);
+
+      if (player === 'RED') {
+        setRedScore(score);
+      } else {
+        setBlueScore(score);
+      }
+    }
+  }, [onReceiveScore?.message]);
+
+  useEffect(() => {
+    if (!redPlayerName || !bluePlayerName || !gameLevel) {
+      alert('Player name or game level is missing');
+      window.location.href = '/';
+    }
+
     countStartFunc.startCountdown();
 
     return () => {
@@ -73,18 +107,41 @@ export default function BattlePage() {
   }, []);
 
   useEffect(() => {
-    if (countStart === 0) {
+    // game start
+    if (countStart === 0 && isStart === false && gameLevel) {
+      console.log('should publish start', redPlayerName, bluePlayerName);
+      const convertedGameLevel = parseInt(gameLevel as string, 10);
+      client?.publish(
+        MQTT_TOPIC.COMMAND,
+        MQTTMessage.command('start', convertedGameLevel)
+      );
+      setStart(true);
       startCountdown();
     }
 
+    // game playing until count is 0
     if (count === 0) {
-      resetCountdown();
+      if (redPlayerName && bluePlayerName) {
+        battleApi
+          .battleControllerCreateBattle({
+            redPlayerName,
+            bluePlayerName,
+            redPlayerScore: redScore,
+            bluePlayerScore: blueScore,
+          })
+          .then(() => {
+            window.location.href = '/';
+          })
+          .finally(() => {
+            setStart(false);
+          });
+      }
     }
   }, [count, countStart]);
 
   return (
     <>
-      {countStart > 0 && (
+      {countStart > 0 && !isStart && (
         <div className="fixed w-full h-full bg-black/60 z-10 flex justify-center items-center">
           <p className="text-battle-score text-amber-300">{countStart}</p>
         </div>

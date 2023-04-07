@@ -1,8 +1,13 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { GameLevel } from '../app/page';
 import { Button } from './Button';
+
+export enum GameLevel {
+  EASY,
+  MEDIUM,
+  HARD,
+}
 
 type PreBattleFormProps = {
   open: boolean;

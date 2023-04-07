@@ -7,7 +7,7 @@ import { ScoreBoardItemList } from '../components/ScoreBoardItemList';
 import { TopScore } from '../components/TopScore';
 import { useRouter } from 'next/navigation';
 
-export enum GameLevel {
+enum GameLevel {
   EASY,
   MEDIUM,
   HARD,
@@ -28,7 +28,9 @@ export default function Home() {
       '/battle?playerRedName=' +
         playerRedName +
         '&playerBlueName=' +
-        playerBlueName
+        playerBlueName +
+        '&gameLevel=' +
+        gameLevel
     );
   };
 
